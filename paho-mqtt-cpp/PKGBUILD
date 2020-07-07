@@ -1,0 +1,41 @@
+# Maintainer: Cody P Schafer <archlinux at codyps.com>
+# Contributor: Martchus <martchus@gmx.net>
+
+pkgname=paho-mqtt-cpp
+pkgver=1.1
+pkgrel=1
+pkgdesc="A cpp wrapper for paho-mqtt-c"
+arch=(any)
+url="https://www.eclipse.org/paho/clients/cpp/"
+license=('EPL')
+groups=()
+depends=( paho-mqtt-c gcc-libs openssl)
+makedepends=(cmake git)
+provides=(${pkgname})
+conflicts=(${pkgname})
+replaces=()
+backup=()
+options=(!emptydirs !makeflags)
+install=
+source=(
+  "git+https://github.com/eclipse/paho.mqtt.cpp.git#tag=v${pkgver}"
+)
+md5sums=('SKIP'
+)
+prepare() {
+  mkdir -p build
+}
+
+build() {
+  cd build
+	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib ../paho.mqtt.cpp
+	make
+}
+
+package() {
+	cd build
+	make DESTDIR="$pkgdir/" install
+}
+
+# vim:set ts=2 sw=2 et:
+
