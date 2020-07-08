@@ -1,5 +1,8 @@
-# Maintainer: Cody P Schafer <archlinux at codyps.com>
+# Maintainer: Smokie <mr.smoke at gmx.net>
+# Contributor: Cody P Schafer <archlinux at codyps.com>
 # Contributor: Martchus <martchus@gmx.net>
+#
+# Note: This is a copy from Cody's PKGBUILD, but adaptd to not use 'master' but tagged releases
 
 pkgname=paho-mqtt-cpp
 pkgver=1.1
@@ -10,6 +13,7 @@ url="https://www.eclipse.org/paho/clients/cpp/"
 license=('EPL')
 groups=()
 depends=( paho-mqtt-c gcc-libs openssl)
+optdepends=( 'doxygen: create HTML documentation during build ')
 makedepends=(cmake git)
 provides=(${pkgname})
 conflicts=(${pkgname})
@@ -28,7 +32,7 @@ prepare() {
 
 build() {
   cd build
-	cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib ../paho.mqtt.cpp
+	cmake -DPAHO_BUILD_DOCUMENTATION=FALSE -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib ../paho.mqtt.cpp
 	make
 }
 

@@ -1,5 +1,8 @@
-# Maintainer: Cody P Schafer <archlinux at codyps.com>
+# Maintainer: Smokie <mr.smoke at gmx.net>
+# Contributor: Cody P Schafer <archlinux at codyps.com>
 # Contributor: Martchus <martchus@gmx.net>
+#
+# Note: This is a copy from Cody's PKGBUILD, but adaptd to not use 'master' but tagged releases
 
 pkgname=paho-mqtt-c
 pkgver=1.3.4
