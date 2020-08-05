@@ -15,7 +15,6 @@ source=(
 )
 sha256sums=( '09dd6f01ff91458bbcf411bc803b2f7d5825abda626f8adc6eea30c088a3859a')
 
-md5sums=('SKIP')
 prepare() {
   cd "${srcdir}/libfvad-${pkgver}"
 
@@ -25,12 +24,10 @@ prepare() {
 
 build() {
   cd "${srcdir}/libfvad-${pkgver}"
-
   make
 }
 
 package() {
   cd "${srcdir}/libfvad-${pkgver}"
-
   make DESTDIR="${pkgdir}" -j1 install
 }
