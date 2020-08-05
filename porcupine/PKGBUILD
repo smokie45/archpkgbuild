@@ -43,6 +43,9 @@ package() {
   if [[ ${myarch} == x86_64 ]]; then
       echo "Install x86_64 specific libs ..."
       install -m 644 -o root -g root lib/linux/x86_64/libpv_porcupine.so ${pkgdir}/usr/lib/libpv_porcupine.so
+      # workaround to fix "space in filename" issue which breaks the for loop below
+      mv "resources/keyword_files/linux/smart mirror_linux.ppn" "resources/keyword_files/linux/smart_mirror_linux.ppn"
+      mv "resources/keyword_files/linux/view glass_linux.ppn" "resources/keyword_files/linux/view_glass_linux.ppn"
       for file in resources/keyword_files/linux/*;do
         install -m 644 ${file} ${pkgdir}/usr/share/porcupine/keyword_files
       done

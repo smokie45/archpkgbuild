@@ -1,0 +1,26 @@
+diff -Naur a/include/fvad.h b/include/fvad.h
+--- a/include/fvad.h	2018-05-01 15:58:51.906475126 +0200
++++ b/include/fvad.h	2020-08-05 22:21:37.874657442 +0200
+@@ -14,7 +14,12 @@
+ 
+ #include <stdint.h>
+ #include <stddef.h>
++#ifdef __cplusplus
+ 
++extern "C"
++{
++
++#endif
+ /*
+  * Type for a VAD instance, an opaque object created using fvad_new().
+  */
+@@ -85,5 +90,9 @@
+  */
+ int fvad_process(Fvad* inst, const int16_t* frame, size_t length);
+ 
++#ifdef __cplusplus
++
++}
+ 
++#endif
+ #endif  // FVAD_H_
