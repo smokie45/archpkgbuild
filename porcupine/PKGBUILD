@@ -1,0 +1,50 @@
+# Maintainer: Smokie
+# 
+# Note: This is a multi architecture package description. Depending on the architecture of the packaging
+# computer, specific files will be included.
+pkgname=porcupine
+pkgver=1.8
+pkgrel=1
+pkgdesc="Wake word engine from picovoice"
+arch=('x86_64' 'armv6h' )
+url="https://github.com/Picovoice/porcupine"
+license=('Apache 2.0')
+depends=()
+provides=('porcupine')
+conflicts=('porcupine')
+# using git will download ~1G as it mirrors complete repository.
+# "git+${url}#tag=v${pkgver}"
+source=(
+    https://github.com/Picovoice/porcupine/archive/v${pkgver}.tar.gz
+)
+sha256sums=( '3eb5865be1df489d2b20a304506b4f2d502e21a6036afca19e331c30a8c0d002' )
+# get current architecture info
+myarch=`uname -m`
+
+package() {
+  cd "${srcdir}/porcupine-${pkgver}"
+  # create diretories in package
+  mkdir -p ${pkgdir}/usr/include
+  mkdir -p ${pkgdir}/usr/lib
+  mkdir -p ${pkgdir}/usr/share/porcupine/keyword_files
+
+  # copy common files to pkg
+  install -m 644 -o root -g root lib/common/porcupine_params.pv ${pkgdir}/usr/share/porcupine/porcupine_params.pv
+  install -m 644 -g root -o root include/* ${pkgdir}/usr/include
+  
+  # copy arch specific files to pkg
+  if [[ ${myarch} == armv6* ]]; then
+      echo "Install armv6 specific libs ..."
+      install -m 644 -o root -g root lib/raspberry-pi/arm11/libpv_porcupine.so ${pkgdir}/usr/lib/libpv_porcupine.so
+      for file in resources/keyword_files/raspberry-pi/*;do
+        install -m 644 ${file} ${pkgdir}/usr/share/porcupine/keyword_files
+      done
+  fi
+  if [[ ${myarch} == x86_64 ]]; then
+      echo "Install x86_64 specific libs ..."
+      install -m 644 -o root -g root lib/linux/x86_64/libpv_porcupine.so ${pkgdir}/usr/lib/libpv_porcupine.so
+      for file in resources/keyword_files/linux/*;do
+        install -m 644 ${file} ${pkgdir}/usr/share/porcupine/keyword_files
+      done
+  fi
+}
