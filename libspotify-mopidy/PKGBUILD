@@ -1,0 +1,25 @@
+# Maintainer: Smokie
+pkgname=libspotify-mopidy
+pkgver=12.1.51
+pkgrel=1
+pkgdesc="libspotify from mopidy website"
+arch=('armv7h' )
+url="https://mopidy.github.io/libspotify-archive/"
+license=('GPL')
+depends=()
+provides=('libspotify')
+conflicts=('libspotify')
+replaces=('libspotify')
+source=("https://mopidy.github.io/libspotify-archive/libspotify-12.1.51-Linux-armv7-release.tar.gz")
+sha256sums=('ad27b6c5aee5382b66b39bfea3b1752076b7abcc445979ce25c1ec9d7ff3aeda')
+
+prepare() {
+    cd "${srcdir}/libspotify-12.1.51-Linux-armv7-release"
+    patch -p1 < ../../ldconfig.patch
+}
+
+package() {
+  cd "${srcdir}/libspotify-12.1.51-Linux-armv7-release"
+  mkdir -p ${pkgdir}/usr/lib
+  make prefix="${pkgdir}/usr" -j1 install
+}
