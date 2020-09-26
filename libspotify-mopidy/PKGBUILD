@@ -1,3 +1,6 @@
+# This will install a backup build of the deprecated libspotify. The backup is
+# maintained by mopidy project.
+#
 # Maintainer: Smokie
 pkgname=libspotify-mopidy
 pkgver=12.1.51
