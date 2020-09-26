@@ -24,6 +24,8 @@ noextract=("lapack-$_lapackver.tar.gz" "atlas$pkgver.tar.bz2")
 sha256sums=('106087f1bb5f46afdfba7f569d0cbe23dacb9a07cd24733765a0e89dbe1ad573'
             '2688eb733a6c5f78a18ef32144039adcd62fabce66f2eb51dd59dde806a6d2b7'
             '7627446a0d598b55bc8f2795f8ff2028f134928b9ca597b76bf8dd5622dbff69')
+# get current architecture info
+myarch=`uname -m`
 
 prepare() {
    msg 'Before building this package, as root you must set the CPU(s)'
@@ -37,12 +39,19 @@ prepare() {
    
 build() {
    cd "$srcdir/ATLAS/build"
+  if [[ ${myarch} == armv6* ]]; then
    ../configure --prefix=/usr \
                 --shared \
                 --with-netlib-lapack-tarfile="$srcdir/lapack-$_lapackver.tar.gz" \
                 -D c -DWALL \
                 -Si archdef 0 -Fa al -mtune=cortex-a72
-
+  fi
+  
+  if [[ ${myarch} == x86_64 ]]; then
+   ../configure --prefix=/usr \
+                --shared \
+                --with-netlib-lapack-tarfile="$srcdir/lapack-$_lapackver.tar.gz" 
+  fi
    make build
    cd lib
    cp "$srcdir/Makefile" .
