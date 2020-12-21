@@ -8,7 +8,7 @@
 
 # Maintainer: Smokie <mr.smoke@gmx.net>
 pkgname=intentd-git
-pkgver=r3.4212a55
+pkgver=r13.c7f3357
 pkgrel=1
 pkgdesc="intend is a small intent handling daemon for HERMES MQTT"
 arch=('any')
@@ -61,14 +61,14 @@ package() {
 	mkdir -p "${pkgdir}/usr/bin/intentd/handlers"
 	# cp -rf * "${pkgdir}/usr/bin/intentd"
 
-	install -Dm644 intentd.py "${pkgdir}/usr/bin/intentd/"
+	install -Dm744 intentd.py "${pkgdir}/usr/bin/intentd/"
 	install -Dm644 PluginManager.py "${pkgdir}/usr/bin/intentd/"
 	install -Dm644 IntentHandler.py "${pkgdir}/usr/bin/intentd/"
 	install -Dm644 handlers/handle_GetTime.py "${pkgdir}/usr/bin/intentd/handlers/"
 	install -Dm644 handlers/handle_GetWeather.py "${pkgdir}/usr/bin/intentd/handlers/"
-	install -Dm644 handlers/handle_Hello.py "${pkgdir}/usr/bin/intentd/handlers/"
+	install -Dm644 handlers/handle_GetNews.py "${pkgdir}/usr/bin/intentd/handlers/"
    
-    mkdir -p "${pkgdir}/lib/systemd/system/"
-    install -Dm644 ressource/intentd.service "${pkgdir}/lib/systemd/system/"
+    mkdir -p "${pkgdir}/usr/lib/systemd/system/"
+    install -Dm644 ressource/intentd.service "${pkgdir}/usr/lib/systemd/system/"
 
 }
