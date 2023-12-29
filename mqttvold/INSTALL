@@ -1,0 +1,22 @@
+post_install() {
+    echo "Enabling and starting mqttvold service...."
+    systemctl enable mqttvold > /dev/null 2>&1
+    systemctl start mqttvold
+}
+
+pre_upgrade() {
+    echo "Stopping mqttvold service"
+    systemctl stop mqttvold
+}
+post_upgrade() {
+    echo "Starting mqttvold service...."
+    systemctl start mqttvold
+}
+
+pre_remove() {
+    echo "Stopping and disabling mqttvold service...."
+    systemctl stop mqttvold
+    systemctl disable mqttvold > /dev/null 2>&1
+
+}
+

@@ -8,7 +8,7 @@
 
 # Maintainer: Smokie <mr.smoke@gmx.net>
 pkgname=mqttvold-git
-pkgver=r5.f150b91
+pkgver=r9.08640b7
 pkgrel=1
 pkgdesc="A small daemon to control pulse volume via mqtt"
 arch=('any')
@@ -22,7 +22,7 @@ conflicts=("${pkgname%-git}")
 replaces=()
 backup=()
 options=()
-install=
+install=INSTALL
 source=("git+${url}")
 noextract=()
 md5sums=('SKIP')
