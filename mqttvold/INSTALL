@@ -1,5 +1,6 @@
 post_install() {
     echo "Enabling and starting mqttvold service...."
+    systemctl daemon-reload
     systemctl enable mqttvold > /dev/null 2>&1
     systemctl start mqttvold
 }
