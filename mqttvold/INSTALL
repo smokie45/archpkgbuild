@@ -10,6 +10,7 @@ pre_upgrade() {
 }
 post_upgrade() {
     echo "Starting mqttvold service...."
+    systemctl daemon-reload
     systemctl start mqttvold
 }
 
