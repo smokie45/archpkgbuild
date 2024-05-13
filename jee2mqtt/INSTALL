@@ -1,0 +1,24 @@
+post_install() {
+    echo "Enabling and starting jee2mqtt service...."
+    systemctl daemon-reload
+    systemctl enable jee2mqtt > /dev/null 2>&1
+    systemctl start jee2mqtt
+}
+
+pre_upgrade() {
+    echo "Stopping jee2mqtt service"
+    systemctl stop jee2mqtt
+}
+post_upgrade() {
+    echo "Starting jee2mqtt service...."
+    systemctl daemon-reload
+    systemctl start jee2mqtt
+}
+
+pre_remove() {
+    echo "Stopping and disabling jee2mqtt service...."
+    systemctl stop jee2mqtt
+    systemctl disable jee2mqtt > /dev/null 2>&1
+
+}
+

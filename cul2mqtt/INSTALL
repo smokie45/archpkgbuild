@@ -1,0 +1,24 @@
+post_install() {
+    echo "Enabling and starting cul2mqtt service...."
+    systemctl daemon-reload
+    systemctl enable cul2mqtt > /dev/null 2>&1
+    systemctl start cul2mqtt
+}
+
+pre_upgrade() {
+    echo "Stopping cul2mqtt service"
+    systemctl stop cul2mqtt
+}
+post_upgrade() {
+    echo "Starting cul2mqtt service...."
+    systemctl daemon-reload
+    systemctl start cul2mqtt
+}
+
+pre_remove() {
+    echo "Stopping and disabling cul2mqtt service...."
+    systemctl stop cul2mqtt
+    systemctl disable cul2mqtt > /dev/null 2>&1
+
+}
+
