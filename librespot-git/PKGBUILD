@@ -1,0 +1,70 @@
+_name=librespot
+pkgname=${_name}-git
+pkgver=r1985.f6473319
+pkgrel=1
+pkgdesc='Open source client library for Spotify'
+arch=('x86_64' 'armv7h' 'aarch64')
+url='https://github.com/librespot-org/librespot'
+license=('MIT')
+depends=(
+	'alsa-lib')
+#	'gst-plugins-base-libs'
+#	'jack'
+#	'libpulse'
+#	'portaudio'
+#	'sdl2')
+
+# cmake & clang required to build aws-lc
+makedepends=('cargo' 'git' 'cmake' 'clang')
+source=("$pkgname::git+${url}#branch=dev" 'remove_cargo_dir.patch')
+sha256sums=('SKIP'
+            'ce141385747fc547ccda5f1723b99759a6cc1521e0fb7d8e333181d86f876a01')
+provides=('librespot')
+conflicts=('librespot')
+
+
+# set CPU arch according manually.
+case "$CARCH" in
+    armv6h) _target=arm-unknown-linux-gnueabihf;;
+    armv7h) _target=armv7-unknown-linux-gnueabihf;;
+    *)      _target="$CARCH-unknown-linux-gnu";;
+esac
+pkgver() {
+	cd "$pkgname"
+	# fetch release count and commit id from git and return as pkgver
+	printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+    # git describe --long --abbrev=7 | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+prepare() {
+	cd "$pkgname"
+    export RUSTUP_TOOLCHAIN=stable     
+#    cargo update --target "$target"       # required to avoid lockfile issue
+#    cargo fetch --locked --target "$target"
+    # rustc knowns CPU arch on this machine. Use it
+    # cargo fetch --offline --target "$(rustc -vV | sed -n 's/host: //p')" 
+# TODO: maybe better use _target as defined above, to be prepared for crosscompile?    
+    cargo fetch --target "$(rustc -vV | sed -n 's/host: //p')" 
+
+    # apply patch
+    git apply ../remove_cargo_dir.patch
+}
+
+build() {
+	cd "$pkgname"
+	export RUSTUP_TOOLCHAIN=stable
+	export CARGO_TARGET_DIR=target
+    # TODO: do we need the target here? Maybe only for fetching ?
+	cargo build --release --frozen --no-default-features --features \
+	    alsa-backend --target "$(rustc -vV | sed -n 's/host: //p')" 
+
+#		alsa-backend,portaudio-backend,pulseaudio-backend,jackaudio-backend,rodio-backend,rodiojack-backend,sdl-backend,gstreamer-backend
+}
+
+package() {
+	cd "${pkgname}"
+	install -Dv "target/${_target}/release/${_name}" -t "$pkgdir/usr/bin/"
+	install -Dvm644 "contrib/${_name}.service" -t "$pkgdir/usr/lib/systemd/system/"
+	install -Dvm644 "contrib/${_name}.user.service" "$pkgdir/usr/lib/systemd/user/${name}.service"
+	install -Dvm644 LICENSE -t "$pkgdir/usr/share/licenses/${_name}/"
+}
