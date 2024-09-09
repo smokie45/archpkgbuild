@@ -1,3 +1,5 @@
+# Contributors:  Philip Goto, Luis Martinez 
+
 _name=librespot
 pkgname=${_name}-git
 pkgver=r1985.f6473319
@@ -41,9 +43,9 @@ prepare() {
     export RUSTUP_TOOLCHAIN=stable     
 #    cargo update --target "$target"       # required to avoid lockfile issue
 #    cargo fetch --locked --target "$target"
-    # rustc knowns CPU arch on this machine. Use it
-    # cargo fetch --offline --target "$(rustc -vV | sed -n 's/host: //p')" 
-# TODO: maybe better use _target as defined above, to be prepared for crosscompile?    
+	# rustc knowns CPU arch on this machine. Use it
+#    cargo fetch --offline --target "$(rustc -vV | sed -n 's/host: //p')" 
+	# TODO: maybe better use _target as defined above, to be prepared for crosscompile?    
     cargo fetch --target "$(rustc -vV | sed -n 's/host: //p')" 
 
     # apply patch
