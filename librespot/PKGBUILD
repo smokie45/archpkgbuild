@@ -1,58 +1,95 @@
-# Maintainer: Luis Martinez <luis dot martinez at disroot dot org>
-# Contributor: Philip Goto <philip.goto@gmail.com>
-
-## GPG key: https://github.com/roderickvd.gpg
-
+# PKGBUILD for librespot, based on AUR PKBGUILD
+#
+# This PKGBUILD allows crosscompilation on x86 for aarch64 !
+# Use: makepkg --config aarch64.makepkg.conf -fsr
+#
+# TODO: 
+#   - x86 build fails with "symbol `ring_core_0_17_8_OPENSSL_ia32cap_P' isn't defined"
+#   - optimize dependend lib handling for xcompile (use a wrapper?)
+#   - make cargo install work
 pkgname=librespot
-pkgver=0.4.2
-_commit=22f8aed
-pkgrel=1
-pkgdesc='Open source client library for Spotify'
-arch=('x86_64' 'armv7h' 'aarch64')
-url='https://github.com/librespot-org/librespot'
+_pkgname=librespot
+pkgver=0.6.0
+pkgrel=2
+#epoch=1
+pkgdesc="Open Source Spotify client library"
+arch=('x86_64' 'aarch64')
+url="https://github.com/librespot-org/librespot"
 license=('MIT')
-depends=(
-	'alsa-lib'
-	'gst-plugins-base-libs'
-	'jack'
-	'libpulse'
-	'portaudio'
-	'sdl2')
-makedepends=('cargo' 'git')
-source=("$pkgname::git+$url#commit=$_commit?signed")
+depends=('libvorbis' 'alsa-lib')
+makedepends=('git' 'rust')
+provides=('librespot')
+conflicts=('librespot')
+#source=('git+https://github.com/librespot-org/librespot')
+source=('git+https://github.com/librespot-org/librespot#tag=v0.6.0')
 sha256sums=('SKIP')
-validpgpkeys=('EC57B7376EAFF1A0BB56BB0187F5FDE8A56219F4') ## Roderick van Domberg
 
+_TARGET="$CARCH-unknown-linux-gnu"
+#pkgver() {
+#    cd "$_pkgname"
+    #echo $(git rev-list --count HEAD).$(git rev-parse --short HEAD)
+    #echo $(git describe --abbrev=0)
+#}
 prepare() {
-	cd "$pkgname"
-    case "$CARCH" in
-      armv6h) target=arm-unknown-linux-gnueabihf;;
-      armv7h) target=armv7-unknown-linux-gnueabihf;;
-      *)      target="$CARCH-unknown-linux-gnu";;
-    esac
-    cargo fetch --locked --target "$target"
+    _HOSTARCH=$(uname -m)
+    [[ ${CARCH} != ${_HOSTARCH} ]] && _XCOMPILE=1
+    if [[ ${_XCOMPILE} ]]; then
+        echo -e "    ${YELLOW}We'll do crosscompiling for ${CARCH} on ${_HOSTARCH}${ALL_OFF}"
+        _SYSROOT=${srcdir}/SYSROOT
+        mkdir -p ${_SYSROOT}
+        export PKG_CONFIG_SYSROOT_DIR=${_SYSROOT}
+        echo "    using _SYSROOT=${_SYSROOT}"
+        if [ ! -f ${_SYSROOT}/alsa-lib-1.2.13-1-aarch64.pkg.tar.xz ]; then
+            echo "    ${YELLOW}Downloading alsa-lib-1.2.13-1-aarch64.pkg.tar.xz${ALL_OFF}"
+            wget -P ${_SYSROOT} http://mirror.archlinuxarm.org/aarch64/extra/alsa-lib-1.2.13-1-aarch64.pkg.tar.xz
+            cd ${_SYSROOT}
+            tar xJf alsa-lib-1.2.13-1-aarch64.pkg.tar.xz
+        fi
+        # TODO: this is fixed for aarch64 only
+        #
+        if [[ ! $( rustup target list | grep "${_TARGET} (installed)") ]]; then
+            echo -e "    ${RED}Error, rustup has no target: ${_TARGET} installed${ALL_OFF}"
+            echo -e "    You may want to invoke 'rustup target add ${_TARGET}'"
+            exit
+        fi
+        export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=/usr/bin/aarch64-linux-gnu-gcc
+        if [ ! -f ${CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER} ]; then
+            echo -e "    ${RED}No xcompiler found at ${CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER}${ALL_OFF}"
+            echo -e "    Maybe you need: 'pacman -S aarch64-linux-gnu-gcc' ?"
+            exit
+        fi
+    fi
 }
 
 build() {
-	export RUSTUP_TOOLCHAIN=stable
-	export CARGO_TARGET_DIR=target
-	cd "$pkgname"
-	cargo build --release --frozen --features \
-		alsa-backend,portaudio-backend,pulseaudio-backend,jackaudio-backend,rodio-backend,rodiojack-backend,sdl-backend,gstreamer-backend
+    cd "$_pkgname"
+
+    echo -e "    ${YELLOW}Building for ${_TARGET}${ALL_OFF}"
+    #echo -e "    ${YELLOW}Building for ${CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER}"
+    cargo build \
+        --release \
+	    --no-default-features \
+	    --features "alsa-backend with-libmdns" \
+	    --target ${_TARGET}
+#        --frozen \
 }
 
-## 0 tests
-# check() {
-# 	export RUSTUP_TOOLCHAIN=stable
-# 	cd "$pkgname"
-# 	cargo test --frozen --features \
-# 		alsa-backend,portaudio-backend,pulseaudio-backend,jackaudio-backend,rodio-backend,rodiojack-backend,sdl-backend,gstreamer-backend
-# }
-
 package() {
-	cd "$pkgname"
-	install -Dv "target/release/$pkgname" -t "$pkgdir/usr/bin/"
-	install -Dvm644 "contrib/$pkgname.service" -t "$pkgdir/usr/lib/systemd/system/"
-	install -Dvm644 "contrib/$pkgname.user.service" "$pkgdir/usr/lib/systemd/user/$pkgname.service"
-	install -Dvm644 LICENSE -t "$pkgdir/usr/share/licenses/$pkgname/"
+    cd "$_pkgname"
+    echo -e "    ${YELLOW}Installing for ${_TARGET}${ALL_OFF}"
+#    cargo install \
+#        --locked \
+#        --no-track \
+#        --path . \           
+#        --root "$pkgdir/usr" \
+#	    --target ${_TARGET}
+#	# TODO cargo install looks into ./target/release instead of ./target/aarch64-...
+	install -D -m 755 target/${_TARGET}/release/librespot \
+        ${pkgdir}/usr/bin/librespot
+    install -D -m 644 contrib/librespot.service \
+        ${pkgdir}/usr/lib/systemd/system/librespot.service
+    install -D -m 644 contrib/librespot.user.service \
+        ${pkgdir}/usr/lib/systemd/user/librespot.service
+    install -D -m 644 LICENSE \
+        ${pkgdir}/usr/share/licenses/${_pkgname}/LICENSE
 }
