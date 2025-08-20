@@ -10,10 +10,11 @@
 pkgname=librespot
 _pkgname=librespot
 pkgver=0.6.0
-pkgrel=2
+pkgrel=3
 #epoch=1
 pkgdesc="Open Source Spotify client library"
-arch=('x86_64' 'aarch64')
+# arch=('x86_64' 'aarch64')
+arch=('aarch64')
 url="https://github.com/librespot-org/librespot"
 license=('MIT')
 depends=('libvorbis' 'alsa-lib')
@@ -21,10 +22,17 @@ makedepends=('git' 'rust')
 provides=('librespot')
 conflicts=('librespot')
 #source=('git+https://github.com/librespot-org/librespot')
-source=('git+https://github.com/librespot-org/librespot#tag=v0.6.0')
+# source=('git+https://github.com/librespot-org/librespot#tag=v0.6.0')
+source=('git+https://github.com/librespot-org/librespot#branch=dev')
 sha256sums=('SKIP')
 
 _TARGET="$CARCH-unknown-linux-gnu"
+# for xcompile. 
+export ARCH=aarch64
+export CROSS_COMPILE=aarch64-linux-gnu-
+# somehoe a makepkg --config=aarch64.makepkg.conf ... does use the nativ strip instead of the CROSS_COMPILE"-strip",
+# resulting in files having "Machine=no" in ELF. As workaround simply avoid stripping here.
+options=('!strip')
 #pkgver() {
 #    cd "$_pkgname"
     #echo $(git rev-list --count HEAD).$(git rev-parse --short HEAD)
@@ -39,11 +47,11 @@ prepare() {
         mkdir -p ${_SYSROOT}
         export PKG_CONFIG_SYSROOT_DIR=${_SYSROOT}
         echo "    using _SYSROOT=${_SYSROOT}"
-        if [ ! -f ${_SYSROOT}/alsa-lib-1.2.13-1-aarch64.pkg.tar.xz ]; then
-            echo "    ${YELLOW}Downloading alsa-lib-1.2.13-1-aarch64.pkg.tar.xz${ALL_OFF}"
-            wget -P ${_SYSROOT} http://mirror.archlinuxarm.org/aarch64/extra/alsa-lib-1.2.13-1-aarch64.pkg.tar.xz
+        if [ ! -f ${_SYSROOT}/alsa-lib-1.2.14-1-aarch64.pkg.tar.xz ]; then
+            echo "    ${YELLOW}Downloading alsa-lib-1.2.14-1-aarch64.pkg.tar.xz${ALL_OFF}"
+            wget -P ${_SYSROOT} http://mirror.archlinuxarm.org/aarch64/extra/alsa-lib-1.2.14-1-aarch64.pkg.tar.xz
             cd ${_SYSROOT}
-            tar xJf alsa-lib-1.2.13-1-aarch64.pkg.tar.xz
+            tar xJf alsa-lib-1.2.14-1-aarch64.pkg.tar.xz
         fi
         # TODO: this is fixed for aarch64 only
         #
@@ -70,13 +78,18 @@ build() {
         --release \
 	    --no-default-features \
 	    --features "alsa-backend with-libmdns" \
-	    --target ${_TARGET}
+	    --features "rustls-tls-native-roots" \
+	    --target ${_TARGET} 
+	#    -vv
 #        --frozen \
 }
 
 package() {
     cd "$_pkgname"
+    # TODO: makepkg will call strip instead of aadrch64-linux-gnu-strip, which causes to have "no machine" in ELF header of stripped binary
+    #       we can avoid strip in aarch64.makepkg.conf
     echo -e "    ${YELLOW}Installing for ${_TARGET}${ALL_OFF}"
+    echo -e "    ${YELLOW}CROSS_COMPILE=${CROSS_COMPILE}${ALL_OFF}"
 #    cargo install \
 #        --locked \
 #        --no-track \
@@ -84,6 +97,7 @@ package() {
 #        --root "$pkgdir/usr" \
 #	    --target ${_TARGET}
 #	# TODO cargo install looks into ./target/release instead of ./target/aarch64-...
+
 	install -D -m 755 target/${_TARGET}/release/librespot \
         ${pkgdir}/usr/bin/librespot
     install -D -m 644 contrib/librespot.service \
