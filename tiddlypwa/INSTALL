@@ -1,0 +1,4 @@
+post_install(){
+   echo -e "--> Remember to add the admin password hash and salt to /etc/tiddlypwa.cfg"
+   echo -e "If necessary, edit /usr/lib/systemd/system/tiddlypw.service."
+}

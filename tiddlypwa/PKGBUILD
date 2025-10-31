@@ -1,0 +1,21 @@
+#Maintainer: Smokie <mr.smoke@gmx.net>
+pkgname=tiddlypwa
+pkgver=0.1
+pkgrel=1
+pkgdesc="TiddlyPWA sycn server"
+arch=('x86_64')
+license=('BSD')
+groups=()
+depends=('deno')
+makedepends=() 
+backup=( 'etc/tiddlypwa.cfg' '/var/lib/tiddlypwa/myTiddly.db')
+options=()
+source=("tiddlypwa.service" "tiddlypwa.cfg")
+noextract=()
+md5sums=('SKIP' 'SKIP')
+install=INSTALL
+
+package() {
+    install -Dm644 tiddlypwa.service "${pkgdir}/usr/lib/systemd/system/tiddlypwa.service"
+    install -Dm644 tiddlypwa.cfg "${pkgdir}/etc/tiddlypwa.cfg"
+}

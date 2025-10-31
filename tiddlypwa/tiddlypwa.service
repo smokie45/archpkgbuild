@@ -1,0 +1,48 @@
+[Unit]
+Description=TiddlyPWA sync server
+Documentation=https://tiddly.packett.cool/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=tiddlypwa
+Group=tiddlypwa
+DynamicUser=yes
+StateDirectory=tiddlypwa
+CacheDirectory=tiddlypwa
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateUsers=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectHostname=yes
+ProtectControlGroups=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectKernelTunables=yes
+ProtectClock=yes
+ProtectProc=noaccess
+ProcSubset=pid
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=yes
+RestrictRealtime=yes
+LockPersonality=yes
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+EnvironmentFile=/etc/tiddlypwa.cfg
+Environment=DB_PATH=/var/lib/tiddlypwa/myTiddly.db
+Environment=DENO_DIR=/var/cache/tiddlypwa/deno
+#ExecStart=/bin/sleep 5m
+ExecStart=/usr/bin/deno --unstable-broadcast-channel --allow-env \
+        --allow-read=/var/lib/tiddlypwa --allow-write=/var/lib/tiddlypwa \
+        --allow-read=/var/lib/private/tiddlypwa --allow-write=/var/lib/private/tiddlypwa \
+        --allow-net=:8000 \
+        https://codeberg.org/valpackett/tiddlypwa/raw/branch/release/server/run.ts --port 8000
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
